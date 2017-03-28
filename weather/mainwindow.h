@@ -71,6 +71,8 @@ private:
     void parseJson(QString Json);
     void parseXml(QString Xml);
     void parseCity(QString City);
+    void loadCitykeys();//加载城市代码文件
+    QMap<QString,QString> citykeys;//存储城市代码
 
     int choose;//0.查询IP 1.今天天气+指数 2.未来5天天气
 

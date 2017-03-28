@@ -30,8 +30,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     manager = new QNetworkAccessManager(this);
     //天气API
-    URL_1 = "http://wthrcdn.etouch.cn/weather_mini?city=";
-    URL_2 = "http://wthrcdn.etouch.cn/WeatherApi?city=";
+    //URL_1 = "http://wthrcdn.etouch.cn/weather_mini?city=";
+    //URL_2 = "http://wthrcdn.etouch.cn/WeatherApi?city=";
+    URL_1 = "http://wthrcdn.etouch.cn/weather_mini?citykey=";
+    URL_2 = "http://wthrcdn.etouch.cn/WeatherApi?citykey=";
+
     connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(replayFinished(QNetworkReply*)));
 
     //设置组件样式
@@ -44,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QDateTime time = QDateTime::currentDateTime();
     ui->date->setText(tr("%1").arg(time.toString("yyyy-MM-dd")));
+
+    //加载城市代码
+    loadCitykeys();
 
     //启动程序后先查询ip定位默认城市
     choose = 0; 
@@ -91,6 +97,26 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *)
     mouse_press = false;
 }
 
+void MainWindow::loadCitykeys() {
+    QFile file(":/citykeys/citykeys");
+    if ( !file.open(QIODevice::ReadOnly | QIODevice::Text) )
+        return ;
+    QString tmp;
+    while (file.atEnd() == 0) {
+        tmp = file.readAll();
+    }
+
+    QStringList list = tmp.split(",");
+    for(int i = 0; i < list.length(); i++) {
+        QString s = list.at(i);
+        QString citys = s.split(":").at(1);
+        QString city = citys.replace("\"", "");
+        QString codes = s.split(":").at(0);
+        QString code = codes.replace("\"", "");
+        citykeys.insert(city, code);
+    }
+}
+
 void MainWindow::replayFinished(QNetworkReply *reply)
 {
     QVariant status_code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
@@ -127,12 +153,13 @@ void MainWindow::replayFinished(QNetworkReply *reply)
 void MainWindow::parseCity(QString City)
 {
     city = City.split(tr("	")).at(5);
-    if(city == "")
+    if(city == "" || citykeys[city]=="")
     {
         QMessageBox::information(this,tr("提示"),tr("无法定位城市,请手动查询"),QMessageBox::Ok,QMessageBox::Ok);
         return;
     }
-    QString url = URL_1 + city;
+    QString url = URL_1 + citykeys[city];
+
     choose = 2;
     manager->get(QNetworkRequest(QUrl(url)));
 }
@@ -181,7 +208,7 @@ void MainWindow::parseJson(QString Json)
         }
         ui->forecast_0_date->setText(tr("今天"));
 
-        QString url = URL_2 + city;
+        QString url = URL_2 + citykeys[city];
         choose = 1;
         manager->get(QNetworkRequest(QUrl(url)));
 
@@ -272,7 +299,12 @@ void MainWindow::on_getButton_clicked()
     if(ui->cityEdit->text().isEmpty())
         return;
     city = ui->cityEdit->text();
-    QString url = URL_1 + city;
+    if(citykeys[city] == "") {
+        QMessageBox::information(this,tr("抱歉"),tr("暂无此城市的天气情况"),QMessageBox::Ok,QMessageBox::Ok);
+        return;
+    }
+    QString url = URL_1 + citykeys[city];
+
     choose = 2;
     manager->get(QNetworkRequest(QUrl(url)));
 }

@@ -37,4 +37,7 @@
         <file alias="update">images/update.png</file>
         <file alias="update_on">images/update_on.png</file>
     </qresource>
+    <qresource prefix="/citykeys">
+        <file alias="citykeys">citykeys/citykeys.txt</file>
+    </qresource>
 </RCC>
