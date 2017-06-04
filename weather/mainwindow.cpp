@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include<QVariant>
 #include<QByteArray>
@@ -145,7 +145,7 @@ void MainWindow::replayFinished(QNetworkReply *reply)
         }
     }
     else
-        QMessageBox::information(this,tr("出错啦"),tr("网络错误,请检查网络连接"),QMessageBox::Ok,QMessageBox::Ok);
+        QMessageBox::information(this,tr("出错啦"),tr("网络错误，请检查网络连接"),QMessageBox::Ok,QMessageBox::Ok);
         //qDebug()<<"网络出错\n";
 }
 
@@ -206,7 +206,7 @@ void MainWindow::parseJson(QString Json)
             forecast_type_list[i]->setPixmap(QPixmap(tr(":/images/%1").arg(forecast[i].type)));
             forecast_type_list[i]->setToolTip(tr("%1 : %2 - %3").arg(forecast[i].type).arg(forecast[i].fengli).arg(forecast[i].fengxiang));
         }
-        ui->forecast_0_date->setText(tr("今天"));
+        ui->forecast_0_date->setText(QStringLiteral("今天"));
 
         QString url = URL_2 + citykeys[city];
         choose = 1;
@@ -272,13 +272,13 @@ void MainWindow::parseXml(QString Xml)
                 ui->temp->setText(tr("%1℃").arg(today.wendu));
                 ui->sunrise->setText(tr("%1").arg(today.sunrise));
                 ui->sunset->setText(tr("%1").arg(today.sunset));
-                ui->label->setText(tr("日出"));
-                ui->label_2->setText(tr("日落"));
-                ui->label_3->setText(tr("湿度"));
+                ui->label->setText(QStringLiteral("日出"));
+                ui->label_2->setText(QStringLiteral("日落"));
+                ui->label_3->setText(QStringLiteral("湿度"));
                 ui->shidu->setText(tr("%1").arg(today.shidu));
                 ui->fengli->setText(tr("%1").arg(today.fengli));
                 ui->fengxiang->setText(tr("%1").arg(today.fengxiang));
-                ui->label_4->setText(tr("感\n冒\n指\n数"));
+                ui->label_4->setText(QStringLiteral("感\n冒\n指\n数")); // utf-8转换
                 ui->ganmao->setText(tr("%1").arg(today.ganmao));
 
                 return;
@@ -313,7 +313,7 @@ void MainWindow::on_getButton_clicked()
 void MainWindow::on_updateButton_clicked()
 {
     //选择UI的id
-    if(uid == 3)
+    if(uid == 9)
         uid = 0;
     else
         uid = uid + 1;

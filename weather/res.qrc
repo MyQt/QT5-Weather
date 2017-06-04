@@ -34,6 +34,12 @@
         <file alias="UI1">images/UI1.png</file>
         <file alias="UI2">images/UI2.png</file>
         <file alias="UI3">images/UI3.png</file>
+        <file alias="UI4">images/UI4.png</file>
+        <file alias="UI5">images/UI5.png</file>
+        <file alias="UI6">images/UI6.png</file>
+        <file alias="UI7">images/UI7.png</file>
+        <file alias="UI8">images/UI8.png</file>
+        <file alias="UI9">images/UI9.png</file>
         <file alias="update">images/update.png</file>
         <file alias="update_on">images/update_on.png</file>
     </qresource>
