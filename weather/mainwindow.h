@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -58,6 +58,8 @@ protected slots:
 private slots:
     void on_getButton_clicked();
     void on_updateButton_clicked();
+
+    void on_cityEdit_textChanged(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;

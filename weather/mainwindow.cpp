@@ -9,7 +9,9 @@
 #include<QJsonValue>
 #include<QXmlStreamReader>
 #include<QMessageBox>
+#include<QToolTip>
 //#include<QDebug>
+#pragma execution_character_set("utf-8")
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->updateButton->setStyleSheet("QPushButton {border-image:url(:/images/update);}QPushButton:hover{border-image:url(:/images/update_on);}QPushButton:hover:pressed{border-image:url(:/images/update);}");
 
     QDateTime time = QDateTime::currentDateTime();
-    ui->date->setText(tr("%1").arg(time.toString("yyyy-MM-dd")));
+    ui->date->setText(QString("%1").arg(time.toString("yyyy-MM-dd")));
 
     //加载城市代码
     loadCitykeys();
@@ -144,9 +146,14 @@ void MainWindow::replayFinished(QNetworkReply *reply)
             parseJson(result);
         }
     }
-    else
-        QMessageBox::information(this,tr("出错啦"),tr("网络错误，请检查网络连接"),QMessageBox::Ok,QMessageBox::Ok);
+    else if (reply->error() != QNetworkReply::UnknownNetworkError)
+    {
+        QNetworkReply::NetworkError error = reply->error();
+        //QMessageBox::information(this,"出错啦","网络错误，请检查网络连接",QMessageBox::Ok,QMessageBox::Ok);
         //qDebug()<<"网络出错\n";
+        QPoint p = ui->centralWidget->mapToGlobal(ui->centralWidget->pos());
+        QToolTip::showText(p, "获取天气信息出错啦,请检查您的网络", ui->centralWidget, ui->centralWidget->rect(), 1000);
+    }
 }
 
 //解析城市信息
@@ -155,7 +162,7 @@ void MainWindow::parseCity(QString City)
     city = City.split(tr("	")).at(5);
     if(city == "" || citykeys[city]=="")
     {
-        QMessageBox::information(this,tr("提示"),tr("无法定位城市,请手动查询"),QMessageBox::Ok,QMessageBox::Ok);
+        QMessageBox::information(this,"提示","无法定位城市,请手动查询",QMessageBox::Ok,QMessageBox::Ok);
         return;
     }
     QString url = URL_1 + citykeys[city];
@@ -179,7 +186,7 @@ void MainWindow::parseJson(QString Json)
         if(desc.toString() != "OK")
         {
             //qDebug()<<"城市错误\n";
-            QMessageBox::information(this,tr("抱歉"),tr("暂无此城市的天气情况"),QMessageBox::Ok,QMessageBox::Ok);
+            QMessageBox::information(this,"抱歉","暂无此城市的天气情况",QMessageBox::Ok,QMessageBox::Ok);
             return;
         }
 
@@ -206,7 +213,7 @@ void MainWindow::parseJson(QString Json)
             forecast_type_list[i]->setPixmap(QPixmap(tr(":/images/%1").arg(forecast[i].type)));
             forecast_type_list[i]->setToolTip(tr("%1 : %2 - %3").arg(forecast[i].type).arg(forecast[i].fengli).arg(forecast[i].fengxiang));
         }
-        ui->forecast_0_date->setText(QStringLiteral("今天"));
+        ui->forecast_0_date->setText(("今天"));
 
         QString url = URL_2 + citykeys[city];
         choose = 1;
@@ -216,7 +223,7 @@ void MainWindow::parseJson(QString Json)
     else
     {
         //qDebug()<<"Json错误";
-        QMessageBox::information(this,tr("出错啦"),tr("数据出错,请重试"),QMessageBox::Ok,QMessageBox::Ok);
+        QMessageBox::information(this,"出错啦","数据出错,请重试",QMessageBox::Ok,QMessageBox::Ok);
         return;
     }
 }
@@ -230,7 +237,7 @@ void MainWindow::parseXml(QString Xml)
     {
         if(xml.hasError())
         {
-            QMessageBox::information(this,tr("出错啦"),tr("数据出错,请重试"),QMessageBox::Ok,QMessageBox::Ok);
+            QMessageBox::information(this,"出错啦","数据出错,请重试",QMessageBox::Ok,QMessageBox::Ok);
             return;
         }
         else if(xml.isStartElement())
@@ -272,13 +279,13 @@ void MainWindow::parseXml(QString Xml)
                 ui->temp->setText(tr("%1℃").arg(today.wendu));
                 ui->sunrise->setText(tr("%1").arg(today.sunrise));
                 ui->sunset->setText(tr("%1").arg(today.sunset));
-                ui->label->setText(QStringLiteral("日出"));
-                ui->label_2->setText(QStringLiteral("日落"));
-                ui->label_3->setText(QStringLiteral("湿度"));
+                ui->label->setText("日出");
+                ui->label_2->setText("日落");
+                ui->label_3->setText("湿度");
                 ui->shidu->setText(tr("%1").arg(today.shidu));
                 ui->fengli->setText(tr("%1").arg(today.fengli));
                 ui->fengxiang->setText(tr("%1").arg(today.fengxiang));
-                ui->label_4->setText(QStringLiteral("感\n冒\n指\n数")); // utf-8转换
+                ui->label_4->setText("感\n冒\n指\n数"); // utf-8转换
                 ui->ganmao->setText(tr("%1").arg(today.ganmao));
 
                 return;
@@ -300,7 +307,7 @@ void MainWindow::on_getButton_clicked()
         return;
     city = ui->cityEdit->text();
     if(citykeys[city] == "") {
-        QMessageBox::information(this,tr("抱歉"),tr("暂无此城市的天气情况"),QMessageBox::Ok,QMessageBox::Ok);
+        QMessageBox::information(this,"抱歉","暂无此城市的天气情况",QMessageBox::Ok,QMessageBox::Ok);
         return;
     }
     QString url = URL_1 + citykeys[city];
@@ -324,4 +331,26 @@ void MainWindow::on_updateButton_clicked()
     pixmap.load(UIpath);
     //产生paintEvent重绘UI
     update();
+}
+
+void MainWindow::on_cityEdit_textChanged(const QString &arg1)
+{
+    QMap<QString, QString>::iterator it = citykeys.begin(),itend = citykeys.end();
+    QString strTips;
+    for (; it != itend; it++) {
+        const QString strCity = it.key();
+        if (strCity.contains(arg1))
+        {
+            strTips.append(strCity + "\n");
+        }
+    }
+    if(!strTips.isEmpty())
+    {
+//        ui->centralWidget->setToolTip(strTips);
+        QPoint p = ui->cityEdit->mapToGlobal(ui->cityEdit->pos());
+
+        QToolTip::showText(p, strTips);
+    } else {
+        QToolTip::hideText();
+    }
 }
